@@ -1,5 +1,1 @@
-<RCC>
-    <qresource prefix="/resources">
-        <file>res/savedImages.txt</file>
-    </qresource>
-</RCC>
+<RCC/>

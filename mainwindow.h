@@ -3,6 +3,14 @@
 
 #include <QListWidgetItem>
 #include <QMainWindow>
+#include <QDebug>
+#include <QPixmap>
+#include <QDir>
+#include <QFileDialog>
+#include <QMessageBox>
+#include <QSqlDatabase>
+#include <QSqlQuery>
+#include <QSqlError>
 
 namespace Ui {
 class MainWindow;
@@ -19,22 +27,21 @@ public:
 private slots:
     void on_browseButton_clicked();
 
-    void on_saveButton_clicked();
-
-    void on_pushButton_clicked();
-
     void on_savedList_itemClicked(QListWidgetItem *item);
+
+    void on_deleteButton_clicked();
 
 private:
     Ui::MainWindow *ui;
 
+    QSqlDatabase db;
     QString current_image;
     QList<QString> images;
 
-    QString isValidNewImage();
     void showImage(QString name);
-    void load();
-    void save();
+    void load(QString name);
+    void initDb();
+    void update();
 };
 
 #endif // MAINWINDOW_H

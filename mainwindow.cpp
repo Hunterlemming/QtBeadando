@@ -1,11 +1,5 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QFileDialog>
-#include <QMessageBox>
-#include <QDir>
-#include <QPixmap>
-#include <QTextStream>
-#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -13,14 +7,66 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     ui->setupUi(this);
+    load("db.sqlite");
+    update();
 
-    load();
 }
 
 MainWindow::~MainWindow()
 {
-    save();
+    db.close();
     delete ui;
+}
+
+void MainWindow::showImage(QString name)
+{
+    current_image = name;
+    ui->imageLabel->setPixmap(QPixmap(current_image).scaled(500,500,Qt::KeepAspectRatio));
+}
+
+void MainWindow::load(QString name)
+{
+    db = QSqlDatabase::addDatabase("QSQLITE");
+    db.setDatabaseName(name);
+
+    if (db.open()){
+        qDebug() << "DB is open";
+
+        if (db.tables().size()==0) {
+            qDebug() << "Empty database";
+            initDb();
+        }
+    } else {
+        QMessageBox::information(this,"Warning","Could not load saved images!");
+    }
+}
+
+void MainWindow::initDb()
+{
+    QSqlQuery query(db);
+    if (!query.exec("CREATE TABLE images (url VARCHAR(100) PRIMARY KEY)")){
+        qDebug() << "Error: " << query.lastError();
+    }
+
+}
+
+void MainWindow::update()
+{
+    images.clear();
+    ui->savedList->clear();
+    QSqlQuery query(db);
+    query.exec("SELECT * FROM images");
+    int i=0;
+    while (query.next())
+    {
+        ui->savedList->addItem(query.value("url").toString());
+        images.push_back(query.value("url").toString());
+        i++;
+    }
+    if (i!=0) {
+        ui->savedList->setCurrentRow(0);
+        showImage(ui->savedList->currentItem()->text());
+    }
 }
 
 void MainWindow::on_browseButton_clicked()
@@ -30,7 +76,11 @@ void MainWindow::on_browseButton_clicked()
         QString extension = file_name.split(".")[1];
 
         if (extension.compare("png")==0 || extension.compare("jpg")==0 || extension.compare("jpeg")==0) {
+            QSqlQuery query(db);
+            query.exec("INSERT INTO images (url) VALUES ('"+ file_name +"')");
+            update();
             showImage(file_name);
+            ui->savedList->setCurrentRow(ui->savedList->count()-1);
         } else {
             QMessageBox::information(this,"Warning","This is not an image!");
         }
@@ -38,92 +88,14 @@ void MainWindow::on_browseButton_clicked()
 
 }
 
-void MainWindow::showImage(QString name)
-{
-    current_image = name;
-    ui->imageLabel->setPixmap(QPixmap(current_image).scaled(500,500,Qt::KeepAspectRatio));
-}
-
-void MainWindow::load()
-{
-    QFile file(":/resources/res/savedImages.txt");
-    if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
-        QTextStream input (&file);
-
-        input.seek(0);
-        while (!input.atEnd()) {
-            QString image = input.readLine();
-            images.push_back(image);
-            ui->savedList->addItem(image);
-        }
-        file.close();
-    } else {
-        QMessageBox::information(this,"Warning","Could not load saved images!");
-    }
-}
-
-void MainWindow::save()
-{
-
-    qDebug() << "a";
-    QFile file(":/resources/res/savedImages.txt");
-    qDebug() << file.isWritable();
-    if (file.open(QFile::WriteOnly | QFile::Text)){
-
-        qDebug() << "a";
-        QTextStream output (&file);
-
-        qDebug() << "a";
-        for (int i=0; i<images.size(); i++){
-            output << images.at(i) << "/n";
-        }
-        qDebug() << "a";
-
-        file.close();
-    } else {
-        QMessageBox::information(this,tr("Warning"),"Could not save images!");
-    }
-}
-
-void MainWindow::on_saveButton_clicked()
-{
-    QString save_success = isValidNewImage();
-    if (save_success.compare("valid")==0) {
-        images.push_back(current_image);
-        ui->savedList->addItem(current_image);
-    } else {
-        QMessageBox::information(this,"Warning",save_success);
-    }
-}
-
-QString MainWindow::isValidNewImage()
-{
-    QString valid = "valid";
-
-    if (current_image.compare("")==0) valid = "Choose an image to save!";
-    for (int i=0; i<images.size(); i++){
-        if (current_image.compare(images.at(i))==0) valid = "Image is already saved!";
-    }
-
-    return valid;
-}
-
 void MainWindow::on_savedList_itemClicked(QListWidgetItem *item)
 {
     showImage(item->text());
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_deleteButton_clicked()
 {
-    if (images.size()!=0) {
-        for (int i = 0; i < images.size(); i++) {
-            if (images.at(i).compare(current_image)==0) {
-                images.removeAt(i);
-                ui->savedList->takeItem(i);
-            }
-        }
-        if (images.size()!=0) showImage(images.at(0));
-    } else {
-        QMessageBox::information(this,"Warning","Choose an image to remove!");
-    }
+    QSqlQuery query(db);
+    query.exec("DELETE FROM images WHERE url='"+ current_image +"'");
+    update();
 }
