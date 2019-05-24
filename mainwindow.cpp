@@ -4,33 +4,85 @@
 #include <QMessageBox>
 #include <QDir>
 #include <QPixmap>
+#include <QTextStream>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
+
     ui->setupUi(this);
 
-    //ui->savedList->addItems(images);
+    load();
 }
 
 MainWindow::~MainWindow()
 {
+    save();
     delete ui;
 }
 
 void MainWindow::on_browseButton_clicked()
 {
     QString file_name = QFileDialog::getOpenFileName(this,"Open a file",QDir::homePath());
-    QString extension = file_name.split(".")[1];
+    if (file_name!="") {
+        QString extension = file_name.split(".")[1];
 
-    if (extension.compare("png")==0 || extension.compare("jpg")==0 || extension.compare("jpeg")==0) {
-        current_image = file_name;
-        ui->imageLabel->setPixmap(QPixmap(current_image));
-    } else {
-        QMessageBox::information(this,"Warning","This is not an image!");
+        if (extension.compare("png")==0 || extension.compare("jpg")==0 || extension.compare("jpeg")==0) {
+            showImage(file_name);
+        } else {
+            QMessageBox::information(this,"Warning","This is not an image!");
+        }
     }
 
+}
+
+void MainWindow::showImage(QString name)
+{
+    current_image = name;
+    ui->imageLabel->setPixmap(QPixmap(current_image).scaled(500,500,Qt::KeepAspectRatio));
+}
+
+void MainWindow::load()
+{
+    QFile file(":/resources/res/savedImages.txt");
+    if (file.open(QIODevice::ReadOnly | QIODevice::Text)){
+        QTextStream input (&file);
+
+        input.seek(0);
+        while (!input.atEnd()) {
+            QString image = input.readLine();
+            images.push_back(image);
+            ui->savedList->addItem(image);
+        }
+        file.close();
+    } else {
+        QMessageBox::information(this,"Warning","Could not load saved images!");
+    }
+}
+
+void MainWindow::save()
+{
+
+    qDebug() << "a";
+    QFile file(":/resources/res/savedImages.txt");
+    qDebug() << file.isWritable();
+    if (file.open(QFile::WriteOnly | QFile::Text)){
+
+        qDebug() << "a";
+        QTextStream output (&file);
+
+        qDebug() << "a";
+        for (int i=0; i<images.size(); i++){
+            output << images.at(i) << "/n";
+        }
+        qDebug() << "a";
+
+        file.close();
+    } else {
+        QMessageBox::information(this,tr("Warning"),"Could not save images!");
+    }
 }
 
 void MainWindow::on_saveButton_clicked()
@@ -56,4 +108,22 @@ QString MainWindow::isValidNewImage()
     return valid;
 }
 
+void MainWindow::on_savedList_itemClicked(QListWidgetItem *item)
+{
+    showImage(item->text());
+}
 
+void MainWindow::on_pushButton_clicked()
+{
+    if (images.size()!=0) {
+        for (int i = 0; i < images.size(); i++) {
+            if (images.at(i).compare(current_image)==0) {
+                images.removeAt(i);
+                ui->savedList->takeItem(i);
+            }
+        }
+        if (images.size()!=0) showImage(images.at(0));
+    } else {
+        QMessageBox::information(this,"Warning","Choose an image to remove!");
+    }
+}

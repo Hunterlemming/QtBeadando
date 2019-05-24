@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <QListWidgetItem>
 #include <QMainWindow>
 
 namespace Ui {
@@ -20,6 +21,10 @@ private slots:
 
     void on_saveButton_clicked();
 
+    void on_pushButton_clicked();
+
+    void on_savedList_itemClicked(QListWidgetItem *item);
+
 private:
     Ui::MainWindow *ui;
 
@@ -27,6 +32,9 @@ private:
     QList<QString> images;
 
     QString isValidNewImage();
+    void showImage(QString name);
+    void load();
+    void save();
 };
 
 #endif // MAINWINDOW_H
