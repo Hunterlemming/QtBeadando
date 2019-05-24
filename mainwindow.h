@@ -12,6 +12,8 @@
 #include <QSqlQuery>
 #include <QSqlError>
 
+#include "bigimagedialog.h"
+
 namespace Ui {
 class MainWindow;
 }
@@ -31,8 +33,11 @@ private slots:
 
     void on_deleteButton_clicked();
 
+    void on_fullScreenButton_clicked();
+
 private:
     Ui::MainWindow *ui;
+    BigImageDialog *bigImage;
 
     QSqlDatabase db;
     QString current_image;

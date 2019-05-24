@@ -26,13 +26,16 @@ CONFIG += c++11
 
 SOURCES += \
         main.cpp \
-        mainwindow.cpp
+        mainwindow.cpp \
+    bigimagedialog.cpp
 
 HEADERS += \
-        mainwindow.h
+        mainwindow.h \
+    bigimagedialog.h
 
 FORMS += \
-        mainwindow.ui
+        mainwindow.ui \
+    bigimagedialog.ui
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

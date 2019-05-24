@@ -99,3 +99,9 @@ void MainWindow::on_deleteButton_clicked()
     query.exec("DELETE FROM images WHERE url='"+ current_image +"'");
     update();
 }
+
+void MainWindow::on_fullScreenButton_clicked()
+{
+    bigImage = new BigImageDialog(this,current_image);
+    bigImage->show();
+}
