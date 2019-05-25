@@ -27,11 +27,13 @@ CONFIG += c++11
 SOURCES += \
         main.cpp \
         mainwindow.cpp \
-    bigimagedialog.cpp
+    bigimagedialog.cpp \
+    imagedata.cpp
 
 HEADERS += \
         mainwindow.h \
-    bigimagedialog.h
+    bigimagedialog.h \
+    imagedata.h
 
 FORMS += \
         mainwindow.ui \

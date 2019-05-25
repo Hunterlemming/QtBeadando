@@ -18,10 +18,23 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::showImage(QString name)
+void MainWindow::showImage(ImageData image)
 {
-    current_image = name;
-    ui->imageLabel->setPixmap(QPixmap(current_image).scaled(500,500,Qt::KeepAspectRatio));
+    current_image = image;
+    ui->imageLabel->setPixmap(QPixmap(current_image.getUrl()).scaled(500,500,Qt::KeepAspectRatio));
+    if (current_image.getCategory().compare("")==0) ui->categoryCBox->setCurrentIndex(0);
+    else ui->categoryCBox->setCurrentIndex(getCBoxIndex(current_image.getCategory()));
+    ui->noteTextEdit->setText(current_image.getNote());
+}
+
+int MainWindow::getCBoxIndex(QString category)
+{
+    if (category.at(0)=='1') return 1;
+    else if (category.at(0)=='2') return 2;
+    else if (category.at(0)=='3') return 3;
+    else if (category.at(0)=='4') return 4;
+    else if (category.at(0)=='5') return 5;
+    else return 6;
 }
 
 void MainWindow::load(QString name)
@@ -44,7 +57,7 @@ void MainWindow::load(QString name)
 void MainWindow::initDb()
 {
     QSqlQuery query(db);
-    if (!query.exec("CREATE TABLE images (url VARCHAR(100) PRIMARY KEY)")){
+    if (!query.exec("CREATE TABLE images (url VARCHAR(100) PRIMARY KEY, category VARCAR(60), note TEXT)")){
         qDebug() << "Error: " << query.lastError();
     }
 
@@ -53,20 +66,37 @@ void MainWindow::initDb()
 void MainWindow::update()
 {
     images.clear();
-    ui->savedList->clear();
+    ui->urlList->clear();
     QSqlQuery query(db);
     query.exec("SELECT * FROM images");
     int i=0;
+
     while (query.next())
     {
-        ui->savedList->addItem(query.value("url").toString());
-        images.push_back(query.value("url").toString());
+        QString url = query.value("url").toString();
+        QString category = query.value("category").toString();
+        QString note = query.value("note").toString();
+
+        ui->urlList->addItem(url);
+        images.push_back(ImageData(url,category,note));
         i++;
     }
     if (i!=0) {
-        ui->savedList->setCurrentRow(0);
-        showImage(ui->savedList->currentItem()->text());
+        ui->urlList->setCurrentRow(0);
+        showImage(images.at(0));
     }
+}
+
+ImageData MainWindow::imageAtUrl(QString url)
+{
+    int i=0;
+    bool found = false;
+    while (i<images.size() && found==false) {
+        if (images.at(i).getUrl().compare(url)==0) found = true;
+        i++;
+    }
+    if (found==true) return images.at(i-1);
+    else return ImageData("x","x","x");
 }
 
 void MainWindow::on_browseButton_clicked()
@@ -79,8 +109,8 @@ void MainWindow::on_browseButton_clicked()
             QSqlQuery query(db);
             query.exec("INSERT INTO images (url) VALUES ('"+ file_name +"')");
             update();
-            showImage(file_name);
-            ui->savedList->setCurrentRow(ui->savedList->count()-1);
+            showImage(imageAtUrl(file_name));
+            ui->urlList->setCurrentRow(ui->urlList->count()-1);
         } else {
             QMessageBox::information(this,"Warning","This is not an image!");
         }
@@ -88,20 +118,38 @@ void MainWindow::on_browseButton_clicked()
 
 }
 
-void MainWindow::on_savedList_itemClicked(QListWidgetItem *item)
-{
-    showImage(item->text());
-}
-
 void MainWindow::on_deleteButton_clicked()
 {
     QSqlQuery query(db);
-    query.exec("DELETE FROM images WHERE url='"+ current_image +"'");
+    query.exec("DELETE FROM images WHERE url='"+ current_image.getUrl() +"'");
     update();
 }
 
 void MainWindow::on_fullScreenButton_clicked()
 {
-    bigImage = new BigImageDialog(this,current_image);
+    bigImage = new BigImageDialog(this,current_image.getUrl());
     bigImage->show();
+}
+
+void MainWindow::on_urlList_itemClicked(QListWidgetItem *item)
+{
+    showImage(imageAtUrl(item->text()));
+}
+
+void MainWindow::on_categoryButton_clicked()
+{
+    QString current_url = current_image.getUrl();
+    QString category = ui->categoryCBox->currentText();
+    QSqlQuery query(db);
+    query.exec("UPDATE images SET category='"+category+"' where url='"+ current_url +"'");
+    update();
+}
+
+void MainWindow::on_noteButton_clicked()
+{
+    QString current_url = current_image.getUrl();
+    QString note = ui->noteTextEdit->toPlainText();
+    QSqlQuery query(db);
+    query.exec("UPDATE images SET note='"+note+"' where url='"+ current_url +"'");
+    update();
 }

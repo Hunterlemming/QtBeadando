@@ -13,6 +13,7 @@
 #include <QSqlError>
 
 #include "bigimagedialog.h"
+#include "imagedata.h"
 
 namespace Ui {
 class MainWindow;
@@ -29,24 +30,30 @@ public:
 private slots:
     void on_browseButton_clicked();
 
-    void on_savedList_itemClicked(QListWidgetItem *item);
-
     void on_deleteButton_clicked();
 
     void on_fullScreenButton_clicked();
+
+    void on_urlList_itemClicked(QListWidgetItem *item);
+
+    void on_categoryButton_clicked();
+
+    void on_noteButton_clicked();
 
 private:
     Ui::MainWindow *ui;
     BigImageDialog *bigImage;
 
     QSqlDatabase db;
-    QString current_image;
-    QList<QString> images;
+    ImageData current_image;
+    QList<ImageData> images;
 
-    void showImage(QString name);
+    void showImage(ImageData image);
     void load(QString name);
     void initDb();
     void update();
+    ImageData imageAtUrl(QString url);
+    int getCBoxIndex(QString category);
 };
 
 #endif // MAINWINDOW_H
