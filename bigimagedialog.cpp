@@ -17,7 +17,8 @@ BigImageDialog::~BigImageDialog()
 
 void BigImageDialog::load()
 {
-    /*int width = ui->imageLabel->width();
-    int height = ui->imageLabel->height();*/
-    ui->imageLabel->setPixmap(QPixmap(imageUrl));
+    QPixmap picture = QPixmap(imageUrl);
+    if (1280<picture.width() || 720<picture.height()){
+        ui->imageLabel->setPixmap(picture.scaled(1280,720,Qt::KeepAspectRatio));
+    } else ui->imageLabel->setPixmap(picture);
 }

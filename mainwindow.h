@@ -40,6 +40,8 @@ private slots:
 
     void on_noteButton_clicked();
 
+    void on_pushButton_clicked();
+
 private:
     Ui::MainWindow *ui;
     BigImageDialog *bigImage;
@@ -51,7 +53,7 @@ private:
     void showImage(ImageData image);
     void load(QString name);
     void initDb();
-    void update();
+    void update(QString sortName = "", QString sortCategory = "");
     ImageData imageAtUrl(QString url);
     int getCBoxIndex(QString category);
 };

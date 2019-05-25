@@ -63,14 +63,22 @@ void MainWindow::initDb()
 
 }
 
-void MainWindow::update()
+void MainWindow::update(QString sortName, QString sortCategory)
 {
     images.clear();
     ui->urlList->clear();
     QSqlQuery query(db);
-    query.exec("SELECT * FROM images");
-    int i=0;
 
+    if (sortName.compare("")==0 && sortCategory.compare("")==0) {
+        query.exec("SELECT * FROM images");
+        ui->nameLineEdit_sort->setText("");
+        ui->categoryCBox_sort->setCurrentIndex(0);
+    }
+    else if (sortName.compare("")!=0 && sortCategory.compare("")==0) query.exec("SELECT * FROM images WHERE url LIKE '%"+sortName+"%'");
+    else if (sortName.compare("")==0 && sortCategory.compare("")!=0) query.exec("SELECT * FROM images WHERE category='"+sortCategory+"'");
+    else query.exec("SELECT * FROM images WHERE url LIKE '%"+sortName+"%' AND category='"+sortCategory+"'");
+
+    int i=0;
     while (query.next())
     {
         QString url = query.value("url").toString();
@@ -152,4 +160,12 @@ void MainWindow::on_noteButton_clicked()
     QSqlQuery query(db);
     query.exec("UPDATE images SET note='"+note+"' where url='"+ current_url +"'");
     update();
+}
+
+void MainWindow::on_pushButton_clicked()
+{
+    QString nameIsLike = ui->nameLineEdit_sort->text();
+    QString categoryIs = ui->categoryCBox_sort->currentText();
+    if (ui->categoryCBox_sort->currentIndex()==0) categoryIs="";
+    update(nameIsLike,categoryIs);
 }
