@@ -40,7 +40,19 @@ private slots:
 
     void on_noteButton_clicked();
 
-    void on_pushButton_clicked();
+    void on_sortButton_clicked();
+
+    void customMenuRequested(QPoint pos);
+
+    void on_actionBrowse_triggered();
+
+    void on_actionShow_triggered();
+
+    void on_actionOriginal_triggered();
+
+    void on_actionDark_triggered();
+
+    void on_actionNeon_triggered();
 
 private:
     Ui::MainWindow *ui;
@@ -56,6 +68,7 @@ private:
     void update(QString sortName = "", QString sortCategory = "");
     ImageData imageAtUrl(QString url);
     int getCBoxIndex(QString category);
+    void sort();
 };
 
 #endif // MAINWINDOW_H

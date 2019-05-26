@@ -7,6 +7,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
 
     ui->setupUi(this);
+    on_actionOriginal_triggered();
+    connect (ui->urlList,SIGNAL(customContextMenuRequested(QPoint)),SLOT(customMenuRequested(QPoint)));
+
     load("db.sqlite");
     update();
 
@@ -35,6 +38,14 @@ int MainWindow::getCBoxIndex(QString category)
     else if (category.at(0)=='4') return 4;
     else if (category.at(0)=='5') return 5;
     else return 6;
+}
+
+void MainWindow::sort()
+{
+    QString nameIsLike = ui->nameLineEdit_sort->text();
+    QString categoryIs = ui->categoryCBox_sort->currentText();
+    if (ui->categoryCBox_sort->currentIndex()==0) categoryIs="";
+    update(nameIsLike,categoryIs);
 }
 
 void MainWindow::load(QString name)
@@ -130,7 +141,7 @@ void MainWindow::on_deleteButton_clicked()
 {
     QSqlQuery query(db);
     query.exec("DELETE FROM images WHERE url='"+ current_image.getUrl() +"'");
-    update();
+    sort();
 }
 
 void MainWindow::on_fullScreenButton_clicked()
@@ -162,10 +173,89 @@ void MainWindow::on_noteButton_clicked()
     update();
 }
 
-void MainWindow::on_pushButton_clicked()
+void MainWindow::on_sortButton_clicked()
 {
-    QString nameIsLike = ui->nameLineEdit_sort->text();
-    QString categoryIs = ui->categoryCBox_sort->currentText();
-    if (ui->categoryCBox_sort->currentIndex()==0) categoryIs="";
-    update(nameIsLike,categoryIs);
+    sort();
+}
+
+void MainWindow::customMenuRequested(QPoint pos)
+{
+    QMenu *menu = new QMenu(this);
+        QAction *showBig = new QAction("Show",this);
+        connect(showBig,SIGNAL(triggered()),this,SLOT(on_fullScreenButton_clicked()));
+        QAction *deleteCurrent = new QAction("Delete",this);
+        connect(deleteCurrent,SIGNAL(triggered()),this,SLOT(on_deleteButton_clicked()));
+    menu->addAction(showBig);
+    menu->addAction(deleteCurrent);
+    menu->popup(ui->urlList->viewport()->mapToGlobal(pos));
+}
+
+void MainWindow::on_actionBrowse_triggered()
+{
+    on_browseButton_clicked();
+}
+
+void MainWindow::on_actionShow_triggered()
+{
+    on_fullScreenButton_clicked();
+}
+
+void MainWindow::on_actionOriginal_triggered()
+{
+    this->setStyleSheet("QWidget#backGroundwidget { background-color: white }"
+
+                        "QMenuBar { background-color: #BDBDBD; color: black }"
+                        "QMenuBar::item:selected { background-color: #E8E8E8 }"
+                        "QMenu { background-color: #BDBDBD; color: black }"
+                        "QMenu::item:selected { background-color: #E8E8E8; font-weight: bold }"
+
+                        "QListWidget { background-color: white; color: black }"
+                        "QListWidget::item:selected { background-color: #E8E8E8; color: black; font-weight: bold }"
+                        "QLineEdit { background-color: white; color: black; selection-background-color: #E8E8E8 }"
+                        "QTextEdit { background-color: white; color: black; selection-background-color: #E8E8E8 }"
+
+                        "QComboBox { background-color: #BDBDBD; color: black }"
+                        "QComboBox QAbstractItemView { background-color: #BDBDBD; color: black }"
+                        "QComboBox::item:selected { background-color: #E8E8E8; color: black; font-weight: bold }"
+                        "QPushButton { background-color: #BDBDBD; color: black };");
+}
+
+void MainWindow::on_actionDark_triggered()
+{
+    this->setStyleSheet("QWidget#backGroundwidget { background-color: #444444 }"
+
+                        "QMenuBar { background-color: black; color: #FF8000 }"
+                        "QMenuBar::item:selected { color: lightyellow }"
+                        "QMenu { background-color: black; color: #FF8000 }"
+                        "QMenu::item:selected { color: lightyellow; font-weight: bold }"
+
+                        "QListWidget { background-color: #444444; color: #FF8000 }"
+                        "QListWidget::item:selected { background-color: lightyellow; color: #FF8000; font-weight: bold }"
+                        "QLineEdit { background-color: #444444; color: #FF8000; selection-background-color: lightyellow }"
+                        "QTextEdit { background-color: #444444; color: #FF8000; selection-background-color: lightyellow }"
+
+                        "QComboBox { background-color: black; color: #FF8000 }"
+                        "QComboBox QAbstractItemView { background-color: black; color: #FF8000 }"
+                        "QComboBox::item:selected { background-color: lightyellow; color: #FF8000; font-weight: bold }"
+                        "QPushButton { background-color: black; color: #FF8000 };");
+}
+
+void MainWindow::on_actionNeon_triggered()
+{ //#FF3500 #FFEC12
+    this->setStyleSheet("QWidget#backGroundwidget { background-color: #FFEC12 }"
+
+                        "QMenuBar { background-color: #FF3500; color: #BE00FF }"
+                        "QMenuBar::item:selected { color: #00E572 }"
+                        "QMenu { background-color: #FF3500; color: #BE00FF }"
+                        "QMenu::item:selected { color: #00E572; font-weight: bold }"
+
+                        "QListWidget { background-color: #FFEC12; color: #BE00FF }"
+                        "QListWidget::item:selected { background-color: #00E572; color: #BE00FF; font-weight: bold }"
+                        "QLineEdit { background-color: #FFEC12; color: #BE00FF; selection-background-color: #00E572 }"
+                        "QTextEdit { background-color: #FFEC12; color: #BE00FF; selection-background-color: #00E572 }"
+
+                        "QComboBox { background-color: #FF3500; color: #BE00FF }"
+                        "QComboBox QAbstractItemView { background-color: #FF3500; color: #BE00FF }"
+                        "QComboBox::item:selected { background-color: #00E572; color: #BE00FF; font-weight: bold }"
+                        "QPushButton { background-color: #FF3500; color: #BE00FF };");
 }
