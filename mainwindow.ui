@@ -294,15 +294,7 @@
      <addaction name="actionDark"/>
      <addaction name="actionNeon"/>
     </widget>
-    <widget class="QMenu" name="menuLanguage">
-     <property name="title">
-      <string>Language</string>
-     </property>
-     <addaction name="actionEnglish"/>
-     <addaction name="actionHungarian"/>
-    </widget>
     <addaction name="menuColor_Scheme"/>
-    <addaction name="menuLanguage"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuSettings"/>
@@ -331,16 +323,6 @@
   <action name="actionNeon">
    <property name="text">
     <string>Neon</string>
-   </property>
-  </action>
-  <action name="actionEnglish">
-   <property name="text">
-    <string>English</string>
-   </property>
-  </action>
-  <action name="actionHungarian">
-   <property name="text">
-    <string>Hungarian</string>
    </property>
   </action>
  </widget>

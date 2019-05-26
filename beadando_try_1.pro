@@ -44,6 +44,7 @@ qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
-RESOURCES +=
+RESOURCES += \
+    resources.qrc
 
-TRANSLATIONS = progi_en.ts progi_hu.ts
+TRANSLATIONS += progi_en.ts progi_hu.ts

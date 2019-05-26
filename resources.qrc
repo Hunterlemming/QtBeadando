@@ -1,1 +1,6 @@
-<RCC/>
+<RCC>
+    <qresource prefix="/ling">
+        <file>progi_en.qm</file>
+        <file>progi_hu.qm</file>
+    </qresource>
+</RCC>
